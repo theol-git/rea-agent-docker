@@ -123,6 +123,28 @@ http-up: ## start the Streamable HTTP bridge for $(ENGINE)
 ida-up: ## start the IDA overlay (needs your own IDA install/licence)
 	$(COMPOSE_ENGINE) -f compose.ida.yml --profile ida up -d rea-ida
 
+# --- Android emulator sidecar (compose.android.yml, budtmo/docker-android) ----
+# Needs /dev/kvm on the host. The REA container name below follows the default
+# names in .env.example; override with CONTAINER=... if you renamed it.
+CONTAINER ?= $(if $(filter all,$(ENGINE)),rea-agent,rea-agent-$(ENGINE))
+COMPOSE_ANDROID = $(COMPOSE) -f docker-compose.yml -f compose.android.yml
+
+.PHONY: android-up
+android-up: ## start the Android emulator sidecar (needs /dev/kvm)
+	$(COMPOSE_ANDROID) up -d android-emulator
+
+.PHONY: android-connect
+android-connect: ## adb-connect the $(ENGINE) REA container to the emulator, wait for boot
+	scripts/android-connect.sh --container $(CONTAINER)
+
+.PHONY: android-status
+android-status: ## adb devices as seen from the $(ENGINE) REA container
+	$(DOCKER) exec $(CONTAINER) adb devices
+
+.PHONY: android-down
+android-down: ## stop and remove the emulator sidecar (keeps its data volume)
+	$(COMPOSE_ANDROID) rm -fsv android-emulator
+
 .PHONY: test-host
 test-host: ## run the harness in a throwaway container against ./work
 	$(DOCKER) run --rm -it --shm-size=1g \
