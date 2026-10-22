@@ -1,0 +1,52 @@
+# =============================================================================
+#  Optional overlay: an Android emulator next to the REA container
+#  (budtmo/docker-android, https://github.com/budtmo/docker-android).
+#
+#    docker compose -f docker-compose.yml -f compose.android.yml up -d android-emulator
+#    make android-up                 # same thing
+#    make android-connect            # adb connect from the REA container, wait for boot
+#
+#  Why a sidecar and not "inside the REA image": the emulator needs /dev/kvm,
+#  several GB of RAM and its own Android SDK, none of which belong in an
+#  analysis image that is already ~8 GB. As a sidecar it shares the compose
+#  network, so the REA container reaches it by service name:
+#
+#      adb connect android-emulator:5555      (run inside the REA container)
+#
+#  Requirements (host):
+#    - x86-64 Linux with hardware virtualisation and a usable /dev/kvm
+#      (`kvm-ok` from cpu-checker; your user usually needs to be in group `kvm`).
+#    - Docker Compose v2.
+#
+#  Security: adb has no authentication. The adb port (5555) is therefore NOT
+#  published to the host by default - only the REA container, on the compose
+#  network, can reach it. The noVNC viewer is published on loopback only.
+#  See docs/ANDROID-EMULATOR.md.
+# =============================================================================
+name: rea-agent
+
+services:
+  android-emulator:
+    # Android version is chosen by the image tag (emulator_9.0 ... emulator_14.0),
+    # e.g. ANDROID_EMULATOR_IMAGE=budtmo/docker-android:emulator_11.0 in .env.
+    image: ${ANDROID_EMULATOR_IMAGE:-budtmo/docker-android:emulator_13.0}
+    container_name: ${ANDROID_EMULATOR_CONTAINER_NAME:-rea-android-emulator}
+    platform: linux/amd64
+    restart: unless-stopped
+    devices:
+      - /dev/kvm:/dev/kvm
+    ports:
+      # noVNC web viewer: http://127.0.0.1:6080
+      - "${ANDROID_NOVNC_BIND:-127.0.0.1}:${ANDROID_NOVNC_PORT:-6080}:6080"
+      # Uncomment ONLY if you need adb from the host. Keep it on loopback.
+      # - "127.0.0.1:5555:5555"
+    environment:
+      EMULATOR_DEVICE: ${ANDROID_EMULATOR_DEVICE:-Samsung Galaxy S10}
+      WEB_VNC: "true"
+    volumes:
+      # Emulator state (installed apps, data) survives restarts.
+      - android-emulator-data:/home/androidusr
+
+volumes:
+  android-emulator-data:
+    name: ${ANDROID_EMULATOR_VOLUME:-rea-android-emulator-data}

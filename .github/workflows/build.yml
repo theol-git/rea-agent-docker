@@ -76,7 +76,10 @@ jobs:
           REA_IMAGE=rea-agent-ida:ci REA_ENGINE=ida \
             docker compose --profile ida \
               -f docker-compose.yml -f compose.http.yml -f compose.ida.yml config --quiet
-          echo "compose: default, three profiles and ida+http+ida-overlay all valid"
+          docker compose -f docker-compose.yml -f compose.android.yml config --quiet
+          docker compose --profile ghidra \
+            -f docker-compose.yml -f compose.android.yml config --quiet
+          echo "compose: default, three profiles, ida+http+ida-overlay and android overlay all valid"
 
       - name: Published image names match the compose defaults
         run: |
@@ -143,7 +146,8 @@ jobs:
           python3 - <<'PY'
           import glob, sys, yaml
           files = sorted(glob.glob(".github/workflows/*.yml")) + \
-                  ["docker-compose.yml", "compose.http.yml", "compose.ida.yml"]
+                  ["docker-compose.yml", "compose.http.yml", "compose.ida.yml",
+                   "compose.android.yml"]
           bad = 0
           for f in files:
               try:

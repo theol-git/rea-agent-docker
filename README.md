@@ -114,6 +114,31 @@ docker compose exec rea-ghidra rea decompile /targets/suspicious.elf main --prov
 
 Full walkthrough: [docs/HERMES-MCP.md](docs/HERMES-MCP.md).
 
+### Claude Code (CLI)
+
+```bash
+claude mcp add rea --scope user -- docker exec -i rea-agent-ghidra rea mcp
+MCP_TIMEOUT=120000 MCP_TOOL_TIMEOUT=1800000 claude     # Ghidra's first analysis is slow
+```
+
+Scopes, timeouts, the bundled skill (`~/.claude/skills/`), pre-approving tools and
+troubleshooting: **[docs/CLAUDE-CODE.md](docs/CLAUDE-CODE.md)**.
+
+### Android emulator (optional sidecar)
+
+For dynamic work on APKs, `compose.android.yml` adds a
+[`budtmo/docker-android`](https://github.com/budtmo/docker-android) emulator on the
+same Compose network (needs `/dev/kvm` on the host):
+
+```bash
+make android-up                      # start the emulator; viewer at http://127.0.0.1:6080
+make android-connect ENGINE=ghidra   # adb connect from the REA container, wait for boot
+docker exec rea-agent-ghidra adb install /targets/app.apk
+```
+
+Details, configuration and security notes (adb is unauthenticated, so its port is
+not published to the host): [docs/ANDROID-EMULATOR.md](docs/ANDROID-EMULATOR.md).
+
 ---
 
 ## What is installed
@@ -127,6 +152,7 @@ Full walkthrough: [docs/HERMES-MCP.md](docs/HERMES-MCP.md).
 | Packets / signals | tshark + capinfos, tcpdump, sigrok-cli + libsigrokdecode | TShark 4.2.2, sigrok-cli 0.7.2 |
 | Web / HTTP | mitmdump, HAR + SAZ readers, Google Chrome, Playwright Chromium | mitmproxy 12.2.3, playwright-core 1.58.2 |
 | Android | jadx-headless-mcp JAR, Apktool, adb | jadx-headless-mcp 0.7.1, Apktool 2.12.1 |
+| Android emulator (optional sidecar, not in the image) | `budtmo/docker-android` via `compose.android.yml` | `emulator_13.0` by default (9.0–14.0 available) |
 | Managed code | .NET SDK 8 + ilspycmd | ilspycmd 8.2.0.7535 |
 | WASM / EVM | WABT, bundled EVMole (npm) | WABT 1.0.42 |
 | JavaScript recovery | Wakaru — unpack bundles and recover readable modules (`recover_javascript_sources`) | Wakaru 1.14.0 (the build REA audited) |
@@ -210,6 +236,7 @@ Dockerfile                 single multi-stage build; one engine (REA_ENGINE) +
 docker-compose.yml         four services (rea-agent, -ghidra, -hopper, -ida)
 compose.http.yml           optional Streamable HTTP MCP bridge (port 8811)
 compose.ida.yml            optional IDA registration overlay (+ sidecar profile)
+compose.android.yml        optional Android emulator sidecar (budtmo/docker-android)
 .env.example               every knob, documented
 Makefile                   build / up / doctor / verify / sizes, per engine
 vendor/                    bring-your-own artefacts (licences) — gitignored
@@ -225,9 +252,11 @@ scripts/verify.sh          run the harness in a throwaway container
 scripts/check-updates.py   are the pins still current? (upstream vs what REA admits)
 scripts/image-name.sh      resolve an engine to its image (one source of truth)
 scripts/setup-ida-mcp.sh   wire IDA into REA (6 modes)
+scripts/android-connect.sh adb-connect the REA container to the emulator, wait for boot
 scripts/hermes-mcp.yaml    paste-ready Hermes MCP block
 docs/                      images, architecture, BYO licences, IDA editions,
-                           multi-arch, MCP, troubleshooting, updates, verification
+                           multi-arch, MCP, Claude Code, Android emulator,
+                           troubleshooting, updates, verification
 .github/workflows/         CI: validate + publish per engine; weekly pin check
 ```
 

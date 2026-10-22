@@ -37,6 +37,15 @@ keeps its own licence and terms. That installed set is:
 | Google Chrome (stable) | proprietary; packaged `.deb` redistributed as downloaded from Google |
 | e2fsprogs, dosfstools, mtools, device-tree-compiler, squashfs-tools, cpio, sleuthkit, 7-Zip, cabextract, yara, upx, nasm, qemu-user-static, cross toolchains, X11/Qt/font libraries | the licence of each Debian/Ubuntu package (predominantly GPL/LGPL/BSD/MIT — see `/usr/share/doc/<package>/copyright` inside the image) |
 
+## Optional sidecar, pulled separately
+
+`compose.android.yml` can start `budtmo/docker-android` (community `emulator_*`
+images) next to the REA container. It is **not** part of the image this project
+builds and nothing from it is redistributed here; Docker pulls it from Docker
+Hub. It and the Android SDK/emulator components inside keep their own licences
+and terms (see the upstream repository's `LICENSE.md`). The paid "pro" images are
+not used. See [`ANDROID-EMULATOR.md`](ANDROID-EMULATOR.md).
+
 ## Not included, on purpose
 
 **IDA Pro / IDA Home / IDA Free** and **JEB** are *not* included in any image
