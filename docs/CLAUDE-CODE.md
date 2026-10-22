@@ -14,7 +14,7 @@ need Docker and nothing else (no clone, no compose, no `make`).
 
 ```bash
 # Option A (recommended): download the launcher once, pin what you run
-mkdir -p ~/.local/bin ~/rea-targets
+mkdir -p ~/.local/bin ~/.rea-agent/targets
 curl -fsSL https://raw.githubusercontent.com/theol-git/rea-agent-docker/main/scripts/rea-mcp.sh \
   -o ~/.local/bin/rea-mcp && chmod +x ~/.local/bin/rea-mcp
 rea-mcp --pull                                   # one-time download of both images (~8 GB + emulator)
@@ -31,8 +31,8 @@ has to download the images, which takes longer than Claude Code's default MCP
 startup timeout; either run `rea-mcp --pull` first (Option A) or start once with
 `MCP_TIMEOUT=1800000 claude` (Option B).
 
-Then drop files in `~/rea-targets/` and ask for them as `/targets/<file>`.
-Results and Ghidra's workspace go to `~/rea-work/`.
+Then drop files in `~/.rea-agent/targets/` and ask for them as `/targets/<file>`.
+Results and Ghidra's workspace go to `~/.rea-agent/work/`.
 
 How it behaves:
 
@@ -41,7 +41,7 @@ How it behaves:
   kept). It uses RAM until you do.
 - **No `/dev/kvm`:** the emulator is skipped and REA runs for static analysis only
   (a note goes to stderr). Force it on or off with `REA_ANDROID=1` / `REA_ANDROID=0`.
-- **Every session is a fresh REA container** (`--rm`); only `~/rea-work` persists.
+- **Every session is a fresh REA container** (`--rm`); only `~/.rea-agent/work` persists.
 - **Settings** (images, Android version, device, folders, viewer port) are
   environment variables, listed by `rea-mcp --help`. Set them when registering:
   `claude mcp add rea --scope user -e REA_ANDROID=1 -- ~/.local/bin/rea-mcp`.

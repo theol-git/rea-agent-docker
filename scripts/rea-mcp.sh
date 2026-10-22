@@ -22,8 +22,8 @@
 #   REA_ANDROID          auto (default: on when /dev/kvm exists) | 1 | 0
 #   ANDROID_EMULATOR_IMAGE   default budtmo/docker-android:emulator_13.0
 #   ANDROID_EMULATOR_DEVICE  default "Samsung Galaxy S10"
-#   REA_TARGETS_DIR      default ~/rea-targets  (mounted read-only at /targets)
-#   REA_WORK_DIR         default ~/rea-work     (mounted at /work)
+#   REA_TARGETS_DIR      default ~/.rea-agent/targets (mounted read-only at /targets)
+#   REA_WORK_DIR         default ~/.rea-agent/work    (mounted at /work)
 #   ANDROID_NOVNC_PORT   default 6080 (published on 127.0.0.1 only)
 set -euo pipefail
 
@@ -34,8 +34,8 @@ ANDROID_CONTAINER="${ANDROID_EMULATOR_CONTAINER_NAME:-rea-android-emulator}"
 ANDROID_VOLUME="${ANDROID_EMULATOR_VOLUME:-rea-android-emulator-data}"
 NOVNC_PORT="${ANDROID_NOVNC_PORT:-6080}"
 NETWORK="${REA_NETWORK:-rea-android}"
-TARGETS_DIR="${REA_TARGETS_DIR:-$HOME/rea-targets}"
-WORK_DIR="${REA_WORK_DIR:-$HOME/rea-work}"
+TARGETS_DIR="${REA_TARGETS_DIR:-$HOME/.rea-agent/targets}"
+WORK_DIR="${REA_WORK_DIR:-$HOME/.rea-agent/work}"
 DOCKER="${DOCKER:-docker}"
 ADB_TARGET="android-emulator:5555"
 
