@@ -51,10 +51,10 @@ Container Registry by CI on every push to `main`, and the packages are **public*
 
 | Image | Engine | Tags |
 | --- | --- | --- |
-| `ghcr.io/alexmi256/rea-agent` | Ghidra + Hopper | `6.7.0-linux-amd64`, `latest` |
-| `ghcr.io/alexmi256/rea-agent-ghidra` | Ghidra | `6.7.0-linux-amd64`, `latest` |
-| `ghcr.io/alexmi256/rea-agent-hopper` | Hopper | `6.7.0-linux-amd64`, `latest` |
-| `ghcr.io/alexmi256/rea-agent-ida` | no engine (BYO IDA) | `6.7.0-linux-amd64`, `latest` |
+| `ghcr.io/theol-git/rea-agent` | Ghidra + Hopper | `6.7.0-linux-amd64`, `latest` |
+| `ghcr.io/theol-git/rea-agent-ghidra` | Ghidra | `6.7.0-linux-amd64`, `latest` |
+| `ghcr.io/theol-git/rea-agent-hopper` | Hopper | `6.7.0-linux-amd64`, `latest` |
+| `ghcr.io/theol-git/rea-agent-ida` | no engine (BYO IDA) | `6.7.0-linux-amd64`, `latest` |
 
 ```bash
 # the compose defaults are already these names, so:
@@ -62,7 +62,7 @@ docker compose pull                       # only the active profiles' services (
 docker compose --profile ghidra up -d rea-ghidra   # pulls that image on demand
 
 # or, explicitly per engine
-docker pull ghcr.io/alexmi256/rea-agent-ghidra:6.7.0-linux-amd64
+docker pull ghcr.io/theol-git/rea-agent-ghidra:6.7.0-linux-amd64
 make pull ENGINE=hopper                   # same thing via the Makefile
 make pull-all                             # all four (~8 GB each)
 make sizes                                # what you now have locally, with sizes
@@ -77,7 +77,7 @@ Notes:
 * **`latest` is per image, not per repo.** There is no "one latest": each engine
   image tracks its own newest build, and the version tag (`6.7.0-linux-amd64`)
   is what you should pin in anything reproducible.
-* **Air-gapped transfer.** `docker save ghcr.io/alexmi256/rea-agent-ghidra:6.7.0-linux-amd64 | gzip > rea-ghidra.tgz`
+* **Air-gapped transfer.** `docker save ghcr.io/theol-git/rea-agent-ghidra:6.7.0-linux-amd64 | gzip > rea-ghidra.tgz`
   then `docker load < rea-ghidra.tgz` on the other side.
 * **The images are ~8 GB each** and most of that is the auxiliary toolchain, not
   the engine — see the size table below for the per-engine deltas.
@@ -89,8 +89,8 @@ Notes:
 
 The workflow publishes `ghcr.io/<repo-owner>/...` automatically — on a fork, the
 owner is your account, so the images appear under your namespace and the compose
-defaults (which point at `alexmi256`) will no longer match. To publish under your
-own account:
+defaults (which point at `theol-git` in this fork) must be renamed to match. To publish
+under your own account:
 
 1. Update the four `REA_*_IMAGE` names in `.env.example`, and the fallbacks in
    `docker-compose.yml` / `compose.http.yml`, to your own

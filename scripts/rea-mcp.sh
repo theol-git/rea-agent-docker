@@ -18,7 +18,7 @@
 #   scripts/rea-mcp.sh --help
 #
 # Settings (environment variables, all optional):
-#   REA_IMAGE            default ghcr.io/alexmi256/rea-agent-ghidra:6.7.0-linux-amd64
+#   REA_IMAGE            default ghcr.io/theol-git/rea-agent-ghidra:6.7.0-linux-amd64
 #   REA_ANDROID          auto (default: on when /dev/kvm exists) | 1 | 0
 #   ANDROID_EMULATOR_IMAGE   default budtmo/docker-android:emulator_13.0
 #   ANDROID_EMULATOR_DEVICE  default "Samsung Galaxy S10"
@@ -27,7 +27,7 @@
 #   ANDROID_NOVNC_PORT   default 6080 (published on 127.0.0.1 only)
 set -euo pipefail
 
-REA_IMAGE="${REA_IMAGE:-ghcr.io/alexmi256/rea-agent-ghidra:6.7.0-linux-amd64}"
+REA_IMAGE="${REA_IMAGE:-ghcr.io/theol-git/rea-agent-ghidra:6.7.0-linux-amd64}"
 ANDROID_IMAGE="${ANDROID_EMULATOR_IMAGE:-budtmo/docker-android:emulator_13.0}"
 ANDROID_DEVICE="${ANDROID_EMULATOR_DEVICE:-Samsung Galaxy S10}"
 ANDROID_CONTAINER="${ANDROID_EMULATOR_CONTAINER_NAME:-rea-android-emulator}"
