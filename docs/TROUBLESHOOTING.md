@@ -85,7 +85,7 @@ evidence, so it is admitted offline; a licensed or hand-built Hopper reports dri
 even though it may analyse fine. To see which build your REA expects:
 
 ```bash
-docker run --rm ghcr.io/alexmi256/rea-agent:latest bash -c \
+docker run --rm ghcr.io/theol-git/rea-agent:latest bash -c \
   'curl -fsSL -H "accept: application/json" -H "user-agent: rea-installer" \
      "https://www.hopperapp.com/include/files-api.php?request=releases&public=true" \
    | jq -r ".\"Ubuntu / Mint\" | [.version, .file_hash, .main_exe_hash] | @tsv"'
@@ -248,7 +248,7 @@ ownership once: `docker compose exec -u 0 rea-agent chown -R $(id -u):$(id -g) /
 **`docker compose pull` says denied / manifest unknown / not found**
 The GHCR packages are public, so `denied` usually means one of three things:
 you are pulling a name that does not exist yet (check
-`ghcr.io/alexmi256/rea-agent-ghidra:6.7.0-linux-amd64` exactly — tags are
+`ghcr.io/theol-git/rea-agent-ghidra:6.7.0-linux-amd64` exactly — tags are
 per-image, there is no repo-wide `latest`), you are offline/behind a proxy that
 blocks `ghcr.io`, or a fork is asking for the upstream namespace. If *your own*
 pushed package is private, fix it once in the UI: package → **Settings → Change

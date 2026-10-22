@@ -727,7 +727,7 @@ HEALTHCHECK --interval=60s --timeout=90s --start-period=120s --retries=3 \
 # inherit the repository's access (public image for a public repo). Without it a
 # pushed image stays private and unrelated to the repo in the GitHub UI.
 # =============================================================================
-ARG OCI_SOURCE=https://github.com/alexmi256/rea-agent-docker
+ARG OCI_SOURCE=https://github.com/theol-git/rea-agent-docker
 LABEL org.opencontainers.image.source="${OCI_SOURCE}" \
       org.opencontainers.image.title="rea-agent-${REA_ENGINE}" \
       org.opencontainers.image.description="REA (Reverse Engineer Anything) with the '${REA_ENGINE}' engine profile plus a full reverse-engineering toolchain (Ghidra/Hopper/IDA-ready, firmware, captures, browsers, managed code, Android, debuggers), MCP-ready." \

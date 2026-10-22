@@ -1,7 +1,7 @@
 # rea-agent — Reverse Engineer Anything in a container, MCP-ready
 
-[![ci](https://github.com/alexmi256/rea-agent-docker/actions/workflows/build.yml/badge.svg)](https://github.com/alexmi256/rea-agent-docker/actions/workflows/build.yml)
-[![ghcr: rea-agent](https://img.shields.io/badge/ghcr.io-alexmi256%2Frea--agent-2496ED?logo=docker&logoColor=white)](https://github.com/alexmi256/rea-agent-docker/pkgs/container/rea-agent)
+[![ci](https://github.com/theol-git/rea-agent-docker/actions/workflows/build.yml/badge.svg)](https://github.com/theol-git/rea-agent-docker/actions/workflows/build.yml)
+[![ghcr: rea-agent](https://img.shields.io/badge/ghcr.io-theol--git%2Frea--agent-2496ED?logo=docker&logoColor=white)](https://github.com/theol-git/rea-agent-docker/pkgs/container/rea-agent)
 
 A Docker image + Compose stack that runs **[REA](https://rea.tools/)
 (`rea-agents`, the "Reverse Engineer Anything" MCP server)** together with every
@@ -22,7 +22,7 @@ engineering without installing a single tool on the host.
   toolchain in all four — pick the disassembler you actually use:
   [docs/IMAGES.md](docs/IMAGES.md).
 * **Published to GHCR:** all four are built and pushed to
-  `ghcr.io/alexmi256/…` on every push to `main`, so `docker compose pull` works
+  `ghcr.io/theol-git/…` on every push to `main`, so `docker compose pull` works
   without building anything ([below](#a-pull-a-published-image-recommended--no-build)).
 * **Surface:** REA's MCP server, ~207 tools, stdio by default (spawned by the
   client through `docker exec`) or Streamable HTTP via an optional bridge.
@@ -47,10 +47,10 @@ Images are published to the GitHub Container Registry on every push to `main`:
 
 | Image | Engine |
 | ----- | ------ |
-| `ghcr.io/alexmi256/rea-agent:6.7.0-linux-amd64` | Ghidra + Hopper |
-| `ghcr.io/alexmi256/rea-agent-ghidra:6.7.0-linux-amd64` | Ghidra only |
-| `ghcr.io/alexmi256/rea-agent-hopper:6.7.0-linux-amd64` | Hopper only |
-| `ghcr.io/alexmi256/rea-agent-ida:6.7.0-linux-amd64` | no engine (bring your own IDA) |
+| `ghcr.io/theol-git/rea-agent:6.7.0-linux-amd64` | Ghidra + Hopper |
+| `ghcr.io/theol-git/rea-agent-ghidra:6.7.0-linux-amd64` | Ghidra only |
+| `ghcr.io/theol-git/rea-agent-hopper:6.7.0-linux-amd64` | Hopper only |
+| `ghcr.io/theol-git/rea-agent-ida:6.7.0-linux-amd64` | no engine (bring your own IDA) |
 
 Each also carries a `:latest` tag. The packages are public — no login, no token,
 just:
@@ -115,6 +115,11 @@ docker compose exec rea-ghidra rea decompile /targets/suspicious.elf main --prov
 Full walkthrough: [docs/HERMES-MCP.md](docs/HERMES-MCP.md).
 
 ### Claude Code (CLI)
+
+Zero-setup, with the Android emulator (needs only Docker; `/dev/kvm` for the
+emulator): download `scripts/rea-mcp.sh` and register it, see
+[docs/CLAUDE-CODE.md](docs/CLAUDE-CODE.md#quickest-path-one-command-emulator-included-no-clone).
+Compose-based setup:
 
 ```bash
 claude mcp add rea --scope user -- docker exec -i rea-agent-ghidra rea mcp
@@ -253,6 +258,7 @@ scripts/check-updates.py   are the pins still current? (upstream vs what REA adm
 scripts/image-name.sh      resolve an engine to its image (one source of truth)
 scripts/setup-ida-mcp.sh   wire IDA into REA (6 modes)
 scripts/android-connect.sh adb-connect the REA container to the emulator, wait for boot
+scripts/rea-mcp.sh         one-command MCP launcher (pull, emulator, adb, stdio) for Claude Code
 scripts/hermes-mcp.yaml    paste-ready Hermes MCP block
 docs/                      images, architecture, BYO licences, IDA editions,
                            multi-arch, MCP, Claude Code, Android emulator,

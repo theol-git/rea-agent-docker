@@ -158,7 +158,7 @@ make build-all                         # all four, shared layers cached
 scripts/verify-all-engines.sh          # 4 × full harness
 ```
 
-Then push: GHCR gets `ghcr.io/alexmi256/rea-agent[-ghidra|-hopper|-ida]:<new>-linux-amd64`
+Then push: GHCR gets `ghcr.io/theol-git/rea-agent[-ghidra|-hopper|-ida]:<new>-linux-amd64`
 plus a per-image `latest`. Old tags stay, so pinned users are unaffected —
 `latest` is per image and always the newest build of *that* image, which is why
 anything reproducible should pin the version tag (see `docs/IMAGES.md`).

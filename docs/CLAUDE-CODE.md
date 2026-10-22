@@ -4,6 +4,55 @@ Claude Code spawns REA's MCP server by running `docker exec -i <container> rea m
 The analysis tools therefore run inside the container; Claude Code itself stays on
 your host. Nothing to install on the host except Docker and the `claude` CLI.
 
+## Quickest path: one command, emulator included, no clone
+
+[`scripts/rea-mcp.sh`](../scripts/rea-mcp.sh) is a launcher Claude Code can run
+directly. On each start it pulls the images if missing, starts the Android
+emulator when the host has `/dev/kvm`, joins both on a private Docker network,
+`adb connect`s the REA container to the emulator, and serves REA over MCP. You
+need Docker and nothing else (no clone, no compose, no `make`).
+
+```bash
+# Option A (recommended): download the launcher once, pin what you run
+mkdir -p ~/.local/bin ~/rea-targets
+curl -fsSL https://raw.githubusercontent.com/theol-git/rea-agent-docker/main/scripts/rea-mcp.sh \
+  -o ~/.local/bin/rea-mcp && chmod +x ~/.local/bin/rea-mcp
+rea-mcp --pull                                   # one-time download of both images (~8 GB + emulator)
+claude mcp add rea --scope user -- ~/.local/bin/rea-mcp
+
+# Option B: nothing stored locally; the script is fetched at every launch
+claude mcp add rea --scope user -- bash -c \
+  'eval "$(curl -fsSL https://raw.githubusercontent.com/theol-git/rea-agent-docker/main/scripts/rea-mcp.sh)"'
+```
+
+Option B executes whatever is on `main` each time you start Claude Code, and
+needs network. Replace `main` with a commit SHA to pin it. The first launch also
+has to download the images, which takes longer than Claude Code's default MCP
+startup timeout; either run `rea-mcp --pull` first (Option A) or start once with
+`MCP_TIMEOUT=1800000 claude` (Option B).
+
+Then drop files in `~/rea-targets/` and ask for them as `/targets/<file>`.
+Results and Ghidra's workspace go to `~/rea-work/`.
+
+How it behaves:
+
+- **The emulator stays up between sessions** so Android only boots once. Watch it
+  at <http://127.0.0.1:6080>. Stop it with `rea-mcp --stop` (its data volume is
+  kept). It uses RAM until you do.
+- **No `/dev/kvm`:** the emulator is skipped and REA runs for static analysis only
+  (a note goes to stderr). Force it on or off with `REA_ANDROID=1` / `REA_ANDROID=0`.
+- **Every session is a fresh REA container** (`--rm`); only `~/rea-work` persists.
+- **Settings** (images, Android version, device, folders, viewer port) are
+  environment variables, listed by `rea-mcp --help`. Set them when registering:
+  `claude mcp add rea --scope user -e REA_ANDROID=1 -- ~/.local/bin/rea-mcp`.
+- Logs go to stderr because stdout carries the MCP protocol. adb is connected in
+  the background shortly after each launch (the emulator can still be booting);
+  to check by hand: `docker ps --filter name=rea-mcp` for the container name, then
+  `docker exec <name> adb devices`.
+
+Sections 1–6 below are the compose-based setup, for when you want to build the
+image yourself or run the stack long-lived.
+
 ## 1. Start the container
 
 ```bash
