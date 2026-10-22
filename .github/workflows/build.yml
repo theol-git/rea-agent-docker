@@ -190,6 +190,8 @@ jobs:
           done
           scripts/verify-all-engines.sh --help >/dev/null
           scripts/build-all.sh --help >/dev/null
+          scripts/rea-mcp.sh --help 2>/dev/null
+          scripts/android-connect.sh --help >/dev/null
           echo "build/up/verify entry points ok"
 
   build:

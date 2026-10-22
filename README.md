@@ -116,6 +116,11 @@ Full walkthrough: [docs/HERMES-MCP.md](docs/HERMES-MCP.md).
 
 ### Claude Code (CLI)
 
+Zero-setup, with the Android emulator (needs only Docker; `/dev/kvm` for the
+emulator): download `scripts/rea-mcp.sh` and register it, see
+[docs/CLAUDE-CODE.md](docs/CLAUDE-CODE.md#quickest-path-one-command-emulator-included-no-clone).
+Compose-based setup:
+
 ```bash
 claude mcp add rea --scope user -- docker exec -i rea-agent-ghidra rea mcp
 MCP_TIMEOUT=120000 MCP_TOOL_TIMEOUT=1800000 claude     # Ghidra's first analysis is slow
@@ -253,6 +258,7 @@ scripts/check-updates.py   are the pins still current? (upstream vs what REA adm
 scripts/image-name.sh      resolve an engine to its image (one source of truth)
 scripts/setup-ida-mcp.sh   wire IDA into REA (6 modes)
 scripts/android-connect.sh adb-connect the REA container to the emulator, wait for boot
+scripts/rea-mcp.sh         one-command MCP launcher (pull, emulator, adb, stdio) for Claude Code
 scripts/hermes-mcp.yaml    paste-ready Hermes MCP block
 docs/                      images, architecture, BYO licences, IDA editions,
                            multi-arch, MCP, Claude Code, Android emulator,
