@@ -55,6 +55,14 @@ Pick the container with `ENGINE=all|ghidra|hopper|ida` (default `all` →
 Run `make android-connect` again after restarting **either** container: the adb
 server inside the REA container forgets its connections when it restarts.
 
+## On demand, with a time limit (no clone, no compose)
+
+If you use the `scripts/rea-mcp.sh` launcher instead of compose, the emulator is
+started only when needed, with a limit that Claude (through the installed skill) or
+you choose, and it removes itself afterwards. See
+[CLAUDE-CODE.md](CLAUDE-CODE.md#emulator-with-a-time-limit). The compose overlay
+below has no timer: stop it with `make android-down`.
+
 ## Use it
 
 Anything in `./targets` is visible inside the REA container as `/targets`, so:
