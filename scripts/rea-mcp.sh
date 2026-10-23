@@ -33,6 +33,9 @@
 #   ANDROID_EMULATOR_DEVICE   default "Samsung Galaxy S10"
 #   REA_TARGETS_DIR           default ~/.rea-agent/targets (mounted read-only at /targets)
 #   REA_WORK_DIR              default ~/.rea-agent/work    (mounted at /work)
+#   REA_PROJECT_MOUNT         ro (default) | rw | off: the folder the client was started in
+#                             is mounted at the SAME absolute path inside the container
+#   REA_PROJECT_DIR           mount this folder instead of the current one
 #   ANDROID_NOVNC_PORT        default 6080 (published on 127.0.0.1 only)
 set -euo pipefail
 
@@ -292,8 +295,9 @@ Commands (run with the Bash tool; `rea-mcp` is normally ~/.local/bin/rea-mcp):
    from the REA container (first boot takes minutes; if the Bash call times out,
    run it again).
 3. Use the device through the REA MCP tools; adb is already pointed at it
-   (`android-emulator:5555`). Files in /targets are visible to REA, so
-   `adb install /targets/app.apk` works from inside the REA container.
+   (`android-emulator:5555`). The folder Claude Code was started in is visible
+   to REA at the same absolute path (read-only by default), and so is /targets, so
+   `adb install <project path>/app.apk` works from inside the REA container.
 4. Running low on time? `rea-mcp android start --ttl 30m` again restarts the
    countdown from now.
 5. `rea-mcp android status` shows what is left; `rea-mcp android stop` ends it
@@ -342,12 +346,46 @@ mkdir -p "$TARGETS_DIR" "$WORK_DIR"
 reap_expired
 pull_if_missing "$REA_IMAGE"
 
+# The folder the MCP client (Claude Code) was started in, mounted at the same
+# absolute path so that paths Claude passes to REA tools resolve unchanged.
+project_args=()
+setup_project_mount() {
+  local mode="${REA_PROJECT_MOUNT:-ro}" explicit="${REA_PROJECT_DIR:-}" dir home_real
+  case "$mode" in
+    off|0|no|false) return 0 ;;
+    ro|rw) ;;
+    *) log "REA_PROJECT_MOUNT must be ro, rw or off (got '$mode'); using ro"; mode=ro ;;
+  esac
+  dir="$(cd "${explicit:-$PWD}" 2>/dev/null && pwd -P)" || {
+    log "project folder '${explicit:-$PWD}' not found; not mounting it"; return 0; }
+  case "$dir" in
+    *[,:]*|*$'\n'*) log "project path contains ',' ':' or a newline; not mounting it: $dir"; return 0 ;;
+    /|/bin|/bin/*|/boot|/boot/*|/dev|/dev/*|/etc|/etc/*|/lib|/lib/*|/lib32|/lib32/*|/lib64|/lib64/*|\
+    /opt|/opt/*|/proc|/proc/*|/root|/root/*|/run|/run/*|/sbin|/sbin/*|/sys|/sys/*|/usr|/usr/*|\
+    /var|/var/*|/work|/work/*|/targets|/targets/*)
+      log "refusing to mount system or reserved folder: $dir"; return 0 ;;
+  esac
+  if [ -z "$explicit" ]; then
+    # Started in $HOME or above it: mounting that would hand ~/.ssh, ~/.claude and
+    # every other secret to a container that analyses untrusted binaries.
+    home_real="$(cd "$HOME" 2>/dev/null && pwd -P || echo "$HOME")"
+    if [ "$dir" = "$home_real" ] || [[ "$home_real/" == "$dir"/* ]]; then
+      log "started in your home folder or above ($dir): not mounting it. Start Claude Code inside a project folder, or set REA_PROJECT_DIR."
+      return 0
+    fi
+  fi
+  if [ "$mode" = "ro" ]; then project_args=(-v "$dir:$dir:ro"); else project_args=(-v "$dir:$dir"); fi
+  log "project folder available to REA at the same path ($mode): $dir"
+}
+setup_project_mount
+
 name="rea-mcp-$$"
 run_args=(run --rm -i --init --shm-size=1g
   --user "$(id -u):$(id -g)"
   -e REA_ENTRYPOINT_DOCTOR=0
   -v "$TARGETS_DIR:/targets:ro"
   -v "$WORK_DIR:/work"
+  ${project_args[@]+"${project_args[@]}"}
   --name "$name")
 
 if android_enabled; then
