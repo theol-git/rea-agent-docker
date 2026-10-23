@@ -35,9 +35,30 @@ startup timeout; either run `rea-mcp --pull` first (Option A) or start once with
 `MCP_TIMEOUT=1800000 claude` (Option B).
 
 Make sure `~/.local/bin` is on your `PATH` (otherwise use the full path below).
-Files you want analysed go in `~/.rea-agent/targets/` (the launcher creates it);
-ask for them as `/targets/<file>`. Results and Ghidra's workspace go to
-`~/.rea-agent/work/`.
+**Which files REA can see.** The folder you started `claude` in is mounted into
+the REA container **at the same absolute path** (read-only by default), so the
+paths Claude passes to REA tools work unchanged: if you run `claude` in
+`~/projects/crackme` and ask about `~/projects/crackme/app.apk`, REA opens exactly
+that path. Two more locations are always there: `~/.rea-agent/targets/` (a
+read-only drop box, seen as `/targets/<file>`) and `~/.rea-agent/work/` (REA's
+workspace and results, seen as `/work`).
+
+Details and limits of the project mount:
+
+- `REA_PROJECT_MOUNT=ro` (default) | `rw` | `off`. If REA needs to write next to a
+  file (exports, patched copies), use `rw`; prefer saving into `/work` instead.
+- `REA_PROJECT_DIR=<dir>` mounts that folder instead of the current one.
+- It is **not** mounted when you start Claude in your home folder or above it, or
+  in a system folder (`/`, `/usr`, `/etc`, ...): that would expose `~/.ssh`,
+  `~/.claude` and other secrets to a container that analyses untrusted files. Start
+  Claude Code inside a project folder, or set `REA_PROJECT_DIR` on purpose.
+- Everything in the mounted folder is readable by the container, including files
+  like `.env`. Keep samples in a folder of their own.
+- Paths containing `:` or `,` cannot be mounted this way.
+- Set it when registering, e.g.
+  `claude mcp add rea --scope user -e REA_PROJECT_MOUNT=rw -- ~/.local/bin/rea-mcp`.
+- The launcher logs the folder it mounted to stderr (visible with `claude --debug`
+  or `/mcp`), which is the quickest way to confirm what REA can see.
 
 ### Emulator with a time limit
 
